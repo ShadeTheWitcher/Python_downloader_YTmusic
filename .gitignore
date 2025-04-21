@@ -1,0 +1,33 @@
+# Ignorar archivos de audio
+*.mp3
+*.m4a
+*.wav
+*.ogg
+*.flac
+*.aac
+*.webm
+
+# Ignorar carpetas de salida (como la que usas para guardar MP3s)
+Mi_musica/
+output/
+downloads/
+
+# Archivos temporales
+*.tmp
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Entornos virtuales
+venv/
+.env/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# VSCode config
+.vscode/
