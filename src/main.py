@@ -79,6 +79,14 @@ class YouTubeMP3Downloader:
         self.console.see(tk.END)
 
     def fetch_info(self):
+        # Limpiar los campos antes de cargar nueva información
+        self.título_entry.delete(0, tk.END)
+        self.artista_entry.delete(0, tk.END)
+        self.álbum_entry.delete(0, tk.END)
+        self.image_label.configure(image='')
+        self.image_label.image = None
+        self.thumb_data = None
+
         url = self.url_entry.get().strip()
         if not url:
             messagebox.showerror("Error", "Introduce una URL válida.")
@@ -90,11 +98,8 @@ class YouTubeMP3Downloader:
                 info = ydl.extract_info(url, download=False)
                 self.info_dict = info
 
-            self.título_entry.delete(0, tk.END)
             self.título_entry.insert(0, info.get("title", ""))
-            self.artista_entry.delete(0, tk.END)
             self.artista_entry.insert(0, info.get("uploader", ""))
-            self.álbum_entry.delete(0, tk.END)
             self.álbum_entry.insert(0, info.get("album", "YouTube"))
 
             thumb_url = info.get("thumbnail")
@@ -188,6 +193,15 @@ class YouTubeMP3Downloader:
             self.image_label.image = img_tk
 
     def start_download_thread(self):
+        # Asegúrate de que la URL, título y artista estén presentes antes de continuar
+        url = self.url_entry.get().strip()
+        title = self.título_entry.get().strip()
+        artist = self.artista_entry.get().strip()
+        if not url or not title or not artist:
+            messagebox.showerror("Error", "Faltan campos obligatorios.")
+            return
+        
+        # Llamar a la función de descarga en otro hilo
         thread = Thread(target=self.download_audio)
         thread.start()
 
