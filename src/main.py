@@ -33,42 +33,47 @@ class YouTubeMP3Downloader:
         self.info_dict = None
 
     def _build_gui(self):
-        # Campos
-        tk.Label(self.root, text="URL de YouTube:").grid(row=0, column=0, sticky='e')
-        self.url_entry = tk.Entry(self.root, width=60)
-        self.url_entry.grid(row=0, column=1, columnspan=3)
-        self.load_btn = tk.Button(self.root, text="Cargar info", command=self.fetch_info)
-        self.load_btn.grid(row=0, column=4, padx=5)
+        self.root.configure(padx=15, pady=15)
 
+        # Fila 0: URL
+        url_frame = tk.Frame(self.root)
+        url_frame.grid(row=0, column=0, columnspan=2, pady=5, sticky="w")
+        tk.Label(url_frame, text="🎥 URL de YouTube:").pack(side="left")
+        self.url_entry = tk.Entry(url_frame, width=50)
+        self.url_entry.pack(side="left", padx=(5, 0))
+        tk.Button(url_frame, text="📋", command=self.paste_url).pack(side="left", padx=5)
+        tk.Button(url_frame, text="Procesar URL🔍", command=self.fetch_info).pack(side="left")
+
+        # Fila 1-3: Metadata
         self._add_label_entry("Título:", 1)
         self._add_label_entry("Artista:", 2)
         self._add_label_entry("Álbum:", 3)
 
-        tk.Label(self.root, text="Carátula:").grid(row=4, column=0, sticky='e')
-        self.image_label = tk.Label(self.root)
-        self.image_label.grid(row=4, column=1, columnspan=2)
-        self.change_image_btn = tk.Button(self.root, text="Cambiar imagen", command=self.select_image)
-        self.change_image_btn.grid(row=4, column=3)
+        # Fila 4: Imagen
+        img_frame = tk.Frame(self.root)
+        img_frame.grid(row=4, column=0, columnspan=2, pady=10, sticky="w")
+        tk.Label(img_frame, text="🎨 Carátula:").pack(side="left")
+        self.image_label = tk.Label(img_frame)
+        self.image_label.pack(side="left", padx=10)
+        tk.Button(img_frame, text="Cambiar imagen", command=self.select_image).pack(side="left")
 
-        self.download_btn = tk.Button(self.root, text="Descargar MP3", command=self.start_download_thread)
-        self.download_btn.grid(row=5, column=1, columnspan=2, pady=10)
+        # Fila 5: Botones de acción
+        btn_frame = tk.Frame(self.root)
+        btn_frame.grid(row=5, column=0, columnspan=2, pady=10)
+        tk.Button(btn_frame, text="⬇️Download MP3", command=self.start_download_thread, width=20).pack(side="left", padx=10)
+        tk.Button(btn_frame, text="Buscar metadata oficial", command=self.fetch_metadata_from_musicbrainz, width=25).pack(side="left", padx=10)
 
-        # Barra de progreso
-        self.progress = ttk.Progressbar(self.root, length=400, mode='determinate')
-        self.progress.grid(row=6, column=0, columnspan=5, pady=(0, 10))
+        # Fila 6: Barra de progreso
+        self.progress = ttk.Progressbar(self.root, length=500, mode='determinate')
+        self.progress.grid(row=6, column=0, columnspan=2, pady=(5, 15))
 
-        # Consola
-        tk.Label(self.root, text="Consola:").grid(row=7, column=0, sticky='nw')
+        # Fila 7-8: Consola
+        tk.Label(self.root, text="🖥 Consola:").grid(row=7, column=0, sticky='w')
         self.console = tk.Text(self.root, height=10, width=80, state='disabled', bg="#111", fg="#0f0")
-        self.console.grid(row=8, column=0, columnspan=5, padx=5, pady=5)
+        self.console.grid(row=8, column=0, columnspan=2)
 
-        # Botón para buscar metadata oficial
-        self.search_metadata_btn = tk.Button(self.root, text="Buscar metadata oficial", command=self.fetch_metadata_from_musicbrainz)
-        self.search_metadata_btn.grid(row=5, column=3, padx=5)
-
-        # Botón Limpiar
-        self.clear_btn = tk.Button(self.root, text="Limpiar", command=self.clear_fields)
-        self.clear_btn.grid(row=9, column=0, columnspan=5, pady=10)
+        # Fila 9: Limpiar
+        tk.Button(self.root, text="Limpiar", command=self.clear_fields, width=20).grid(row=9, column=0, columnspan=2, pady=15)
 
     def _add_label_entry(self, label_text, row):
         tk.Label(self.root, text=label_text).grid(row=row, column=0, sticky='e')
@@ -293,6 +298,14 @@ class YouTubeMP3Downloader:
         self.console.configure(state='normal')
         self.console.delete(1.0, tk.END)
         self.console.configure(state='disabled')
+
+    def paste_url(self):
+        try:
+            clipboard_content = self.root.clipboard_get()
+            self.url_entry.delete(0, tk.END)
+            self.url_entry.insert(0, clipboard_content)
+        except tk.TclError:
+            messagebox.showerror("Error", "No se pudo acceder al portapapeles.")
 
 # Lanzar la app
 if __name__ == "__main__":
