@@ -66,6 +66,10 @@ class YouTubeMP3Downloader:
         self.search_metadata_btn = tk.Button(self.root, text="Buscar metadata oficial", command=self.fetch_metadata_from_musicbrainz)
         self.search_metadata_btn.grid(row=5, column=3, padx=5)
 
+        # Botón Limpiar
+        self.clear_btn = tk.Button(self.root, text="Limpiar", command=self.clear_fields)
+        self.clear_btn.grid(row=9, column=0, columnspan=5, pady=10)
+
     def _add_label_entry(self, label_text, row):
         tk.Label(self.root, text=label_text).grid(row=row, column=0, sticky='e')
         entry = tk.Entry(self.root, width=50)
@@ -276,11 +280,26 @@ class YouTubeMP3Downloader:
             self.log(f"❌ Error: {e}")
             messagebox.showerror("Error", str(e))
 
+    def clear_fields(self):
+        """Limpia todos los campos para ingresar nueva música."""
+        self.url_entry.delete(0, tk.END)
+        self.título_entry.delete(0, tk.END)
+        self.artista_entry.delete(0, tk.END)
+        self.álbum_entry.delete(0, tk.END)
+        self.image_label.configure(image='')
+        self.image_label.image = None
+        self.thumb_data = None
+        self.progress['value'] = 0
+        self.console.configure(state='normal')
+        self.console.delete(1.0, tk.END)
+        self.console.configure(state='disabled')
+
 # Lanzar la app
 if __name__ == "__main__":
     root = tk.Tk()
     app = YouTubeMP3Downloader(root)
     root.mainloop()
+
 
 
 
