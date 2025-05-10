@@ -74,6 +74,9 @@ class YouTubeMP3Downloader:
 
         # Fila 9: Limpiar
         tk.Button(self.root, text="Limpiar", command=self.clear_fields, width=20).grid(row=9, column=0, columnspan=2, pady=15)
+        # Fila 10: Marca de agua
+        tk.Label(self.root, text="by ShadeTheWitcher", font=("Arial", 8), fg="gray").grid(row=10, column=0, columnspan=2, sticky="e", pady=(0, 5), padx=10)
+
 
     def _add_label_entry(self, label_text, row):
         tk.Label(self.root, text=label_text).grid(row=row, column=0, sticky='e')
