@@ -11,6 +11,11 @@
 Mi_musica/
 output/
 downloads/
+Downloaded Music/
+
+#ignorar ffmpeg
+src/ffmpeg/
+
 
 # Archivos temporales
 *.tmp
