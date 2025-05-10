@@ -10,7 +10,7 @@ from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, APIC
 import subprocess
 from threading import Thread
-
+import platform
 # Ruta al ffmpeg
 if getattr(sys, 'frozen', False):
     base_path = sys._MEIPASS
@@ -74,8 +74,11 @@ class YouTubeMP3Downloader:
 
         # Fila 9: Limpiar
         tk.Button(self.root, text="Limpiar", command=self.clear_fields, width=20).grid(row=9, column=0, columnspan=2, pady=15)
-        # Fila 10: Marca de agua
-        tk.Label(self.root, text="by ShadeTheWitcher", font=("Arial", 8), fg="gray").grid(row=10, column=0, columnspan=2, sticky="e", pady=(0, 5), padx=10)
+        
+         # Fila 10: Botón para abrir carpeta de descargas
+        tk.Button(self.root, text="📂 Abrir carpeta de descargas", command=self.open_download_folder).grid(row=10, column=0, columnspan=2, pady=10)
+        # Fila 11: Marca de agua
+        tk.Label(self.root, text="by ShadeTheWitcher", font=("Arial", 8), fg="gray").grid(row=11, column=0, columnspan=2, sticky="e", pady=(0, 5), padx=10)
 
 
     def _add_label_entry(self, label_text, row):
@@ -309,7 +312,14 @@ class YouTubeMP3Downloader:
             self.url_entry.insert(0, clipboard_content)
         except tk.TclError:
             messagebox.showerror("Error", "No se pudo acceder al portapapeles.")
-
+            
+    def open_download_folder(self):
+        if platform.system() == "Windows":
+            subprocess.run(["explorer", OUTPUT_FOLDER])
+        elif platform.system() == "Darwin":  # macOS
+            subprocess.run(["open", OUTPUT_FOLDER])
+        else:  # Linux
+            subprocess.run(["xdg-open", OUTPUT_FOLDER])
 # Lanzar la app
 if __name__ == "__main__":
     root = tk.Tk()
