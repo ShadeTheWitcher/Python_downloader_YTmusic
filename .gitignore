@@ -36,3 +36,28 @@ Thumbs.db
 
 # VSCode config
 .vscode/
+
+# PyInstaller build folders
+/build/
+src/build/
+src/dist/
+/__pycache__/
+
+
+
+# Logs
+*.log
+
+# Virtual environment (si usas uno en la carpeta del proyecto)
+venv/
+.env/
+
+# Archivos temporales
+*.pyc
+*.pyz
+*.pyo
+/*.spec
+*.spec
+*.toc
+*.pkg
+*.~*
