@@ -62,6 +62,10 @@ class YouTubeMP3Downloader:
         self.console = tk.Text(self.root, height=10, width=80, state='disabled', bg="#111", fg="#0f0")
         self.console.grid(row=8, column=0, columnspan=5, padx=5, pady=5)
 
+        # Botón para buscar metadata oficial
+        self.search_metadata_btn = tk.Button(self.root, text="Buscar metadata oficial", command=self.fetch_metadata_from_musicbrainz)
+        self.search_metadata_btn.grid(row=5, column=3, padx=5)
+
     def _add_label_entry(self, label_text, row):
         tk.Label(self.root, text=label_text).grid(row=row, column=0, sticky='e')
         entry = tk.Entry(self.root, width=50)
@@ -105,6 +109,73 @@ class YouTubeMP3Downloader:
             self.log("✅ Información cargada correctamente.")
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def fetch_metadata_from_musicbrainz(self):
+        title = self.título_entry.get().strip()
+        artist = self.artista_entry.get().strip()
+
+        if not title or not artist:
+            messagebox.showerror("Error", "Debes ingresar un título y artista primero.")
+            return
+
+        self.log("🔍 Buscando metadata oficial...")
+        
+        try:
+            # Configurar los headers con un User-Agent
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+            }
+            
+            # Consultar MusicBrainz API
+            search_url = f"https://musicbrainz.org/ws/2/recording?query=artist:{artist}+recording:{title}&fmt=json"
+            response = requests.get(search_url, headers=headers)
+
+            # Verificar si la respuesta es correcta
+            if response.status_code == 403:
+                self.log(f"❌ Error 403: Acceso denegado por MusicBrainz.")
+                messagebox.showerror("Error 403", "Acceso denegado por MusicBrainz. Intenta más tarde.")
+                return
+
+            if response.status_code != 200:
+                self.log(f"❌ Error al consultar MusicBrainz: {response.status_code}")
+                messagebox.showerror("Error", f"No se pudo obtener datos de MusicBrainz. Código de error: {response.status_code}")
+                return
+
+            data = response.json()
+
+            if not data.get("recordings"):
+                messagebox.showwarning("No encontrado", "No se encontró metadata oficial.")
+                return
+
+            recording = data["recordings"][0]
+            mb_title = recording.get("title", title)
+            mb_artist = recording.get("artist", artist)
+            mb_album = recording.get("releases", [{}])[0].get("title", "Unknown")
+
+            # Actualizar los campos de la UI
+            self.título_entry.delete(0, tk.END)
+            self.título_entry.insert(0, mb_title)
+            self.artista_entry.delete(0, tk.END)
+            self.artista_entry.insert(0, mb_artist)
+            self.álbum_entry.delete(0, tk.END)
+            self.álbum_entry.insert(0, mb_album)
+
+            # Buscar portada en Cover Art Archive
+            release_id = recording["releases"][0]["id"]
+            cover_url = f"https://coverartarchive.org/release/{release_id}/front"
+            cover_response = requests.get(cover_url)
+
+            if cover_response.status_code == 200:
+                self.thumb_data = cover_response.content
+                img = Image.open(io.BytesIO(self.thumb_data)).resize((100, 100))
+                img_tk = ImageTk.PhotoImage(img)
+                self.image_label.configure(image=img_tk)
+                self.image_label.image = img_tk
+
+            self.log("✅ Metadata oficial encontrada y actualizada.")
+        except Exception as e:
+            self.log(f"❌ Error: {e}")
+            messagebox.showerror("Error", f"No se pudo obtener la metadata: {e}")
 
     def select_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Imágenes", "*.jpg *.jpeg *.png")])
@@ -162,9 +233,7 @@ class YouTubeMP3Downloader:
             base, _ = os.path.splitext(downloaded_file)
             mp3_file = base + ".mp3"
 
-            result = subprocess.run([
-                FFMPEG_PATH, "-i", downloaded_file, mp3_file
-            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            result = subprocess.run([FFMPEG_PATH, "-i", downloaded_file, mp3_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             self.log(result.stdout)
             self.log(result.stderr)
@@ -198,6 +267,7 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = YouTubeMP3Downloader(root)
     root.mainloop()
+
 
 
 
